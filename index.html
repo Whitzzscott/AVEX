@@ -13,13 +13,13 @@
             const personaData = document.getElementById('personaData').value;
 
             if (!apiKey) {
-                alert('Please enter your API key.');
+                alert('Please enter your API key, at https://aistudio.google.com/app/apikey.');
                 return;
             }
           
             const prompt = personaData 
-                ? `You will only generate character persona using the given persona: ${personaData}, generated responses must be in json format.` 
-                : 'Generate a random character if there are no given text, the character must have a unique persona and background.';
+                ? `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}, generated responses must be in json format.` 
+                : 'Generate a random character if there are no given text like if the character persona is a bunch of letters then generate a random character, the character must have a unique persona and background.';
 
             try {
                 const genAI = new GoogleGenerativeAI(apiKey);
@@ -43,7 +43,7 @@
                 document.getElementById('result').textContent = output;
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred. Check the console for details.');
+                alert('An error occurred. Check the console for details (debugging purpose).');
             }
         }
 
@@ -62,7 +62,7 @@
     <input type="text" id="apiKey" placeholder="Enter your API key">
     <br>
     <label for="personaData">Persona Data:</label>
-    <textarea id="personaData" rows="6" placeholder="Enter persona data here (or leave empty for a random character)"></textarea>
+    <textarea id="personaData" rows="6" placeholder="Enter persona data here"></textarea>
     <br>
     <button id="generateBtn">Generate Character</button>
     <h2>Result:</h2>
