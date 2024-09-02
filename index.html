@@ -18,7 +18,7 @@
             }
           
             const prompt = personaData 
-                ? `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}, generated responses must be in json format.` 
+                ? `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}, generated responses must be in json format, the generated result must have persona, scenario, first message.` 
                 : 'Generate a random character if there are no given text like if the character persona is a bunch of letters then generate a random character, the character must have a unique persona and background.';
 
             try {
@@ -67,5 +67,20 @@
     <button id="generateBtn">Generate Character</button>
     <h2>Result:</h2>
     <pre id="result"></pre>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const resultBox = document.getElementById('result');
+
+        resultBox.addEventListener('dblclick', () => {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNode(resultBox);
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand('copy');
+            alert('Text copied to clipboard!');
+        });
+    });
+</script>
 </body>
 </html>
