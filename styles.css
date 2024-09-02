@@ -101,6 +101,7 @@ button:active {
     transform: translateY(20px);
     animation: fadeInUp 0.8s forwards;
     transition: box-shadow 0.3s, transform 0.3s;
+    user-select: text;
 }
 
 #result:hover {
