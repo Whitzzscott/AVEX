@@ -13,13 +13,13 @@
             const personaData = document.getElementById('personaData').value;
 
             if (!apiKey) {
-                alert('Please enter your API key, at https://aistudio.google.com/app/apikey, and make sure you have text inside persona data');
+                alert('Please enter your API key at https://aistudio.google.com/app/apikey, and make sure you have text inside persona data');
                 return;
             }
           
             const prompt = personaData 
-                ? `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}, generated responses must be in json format or w++ format, the generated result must have persona containing appearance, background story, scenario, first message, example conversation, which basically train the bot use these format for example conversation = {{char1}: here, {{user}}: here..` 
-                : 'Generate a random character if there are no given text like if the character persona is a bunch of letters then generate a random character, the character must have a unique persona and background.';
+                ? `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}. Generated responses must be in JSON format or W++ format. The generated result must have a persona containing appearance, background story, scenario, first message, and example conversation (e.g., {{char1}: here, {{user}}: here}).`
+                : 'Generate a random character if there is no given text. The character must have a unique persona and background.';
 
             try {
                 const genAI = new GoogleGenerativeAI(apiKey);
@@ -33,17 +33,29 @@
                         category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
                         threshold: HarmBlockThreshold.BLOCK_NONE,
                     },
+                    {
+                        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                        threshold: HarmBlockThreshold.BLOCK_NONE,
+                    },
+                    {
+                        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                        threshold: HarmBlockThreshold.BLOCK_NONE,
+                    },
                 ];
 
-                const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings });
+                const model = genAI.getGenerativeModel({
+                    model: "gemini-1.5-flash",
+                    systemInstruction: `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}. Generated responses must be in JSON format or W++ format. The generated result must have a persona containing appearance, background story, scenario, first message, and example conversation (e.g., {{char1}: here, {{user}}: here}).`,
+                    safetySettings
+                });
 
                 const result = await model.generateContent(prompt);
-                const output = result.response.text();
+                const output = await result.response.text();
 
                 document.getElementById('result').textContent = output;
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred. Check the console for details (debugging purpose), or if there is no api in the "gemini api key" please get one at https://aistudio.google.com/app/apikey.');
+                alert('An error occurred. Check the console for details (debugging purposes). If there is no API key in the "Gemini API Key", please get one at https://aistudio.google.com/app/apikey.');
             }
         }
 
@@ -51,13 +63,13 @@
             document.getElementById('generateBtn').addEventListener('click', generateCharacter);
         });
     </script>
-  <link
+    <link
         rel="icon"
-        href="https://cdn.glitch.global/09e7d406-caae-4b1a-a38a-e9d7ed27db3d/jfdcbvjhsbjhghrighuih%20ushfufghusgugdfuhgsfg.jpg?v=1725287661085"
+        href="https://cdn.glitch.global/09e7d406-caae-4b1a-a38a-e9d7ed27db3d/4006f745-0f1a-4c7c-92f3-66bdb50df208-cover.png?v=1725294838912"
         type="image/x-icon"/>
 </head>
 <body>
-    <h1>Whitz character gen</h1>
+    <h1>Whitz Character Gen</h1>
     <label for="apiKey">Gemini API Key:</label>
     <input type="text" id="apiKey" placeholder="Enter your API key">
     <br>
@@ -67,20 +79,20 @@
     <button id="generateBtn">Generate Character</button>
     <h2>Result:</h2>
     <pre id="result"></pre>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const resultBox = document.getElementById('result');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const resultBox = document.getElementById('result');
 
-        resultBox.addEventListener('dblclick', () => {
-            const selection = window.getSelection();
-            const range = document.createRange();
-            range.selectNode(resultBox);
-            selection.removeAllRanges();
-            selection.addRange(range);
-            document.execCommand('copy');
-            alert('Text copied to clipboard!');
+            resultBox.addEventListener('dblclick', () => {
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNode(resultBox);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                document.execCommand('copy');
+                alert('Text copied to clipboard!');
+            });
         });
-    });
-</script>
+    </script>
 </body>
 </html>
