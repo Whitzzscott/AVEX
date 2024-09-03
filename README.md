@@ -2,14 +2,16 @@
 
 ## Overview
 
-AVEX is a web application designed to generate diverse character personas using Google's Generative AI.
+AVEX is a sophisticated web application designed to generate diverse and dynamic character personas using Google's Generative AI.
 
 ## Features
 
-- **Generate Character Personas:** Create characters with preset persona data or generate random ones for a range of unique outputs.
-- **Interactive User Interface:** Experience a modern, sleek design enhanced with animations and advanced lighting effects for a visually appealing interaction.
-- **Dynamic Content Display:** Enjoy smooth hover effects and engaging animations that make the user experience both enjoyable and interactive.
-- **API Integration:** Easily connect with Google's Generative AI using your API key, allowing for flexible and powerful character creation.
-- **Performance:** Benefit from fast and responsive AI interactions, providing quick and efficient results.
-- **Fast and Simple:** If you have an API key, simply paste it and hit "Generate" to quickly create character personas with minimal effort.
-- **FREE** avex is very free with simple freindly ui, use this all you want without limit.
+- **Generate Character Personas:** Create unique characters using preset persona data or generate random ones for varied outputs.
+- **Interactive User Interface:** Enjoy a sleek design, enhanced with animations and advanced lighting effects to provide a visually appealing interaction.
+- **Dynamic Content Display:** Experience smooth hover effects and engaging animations that make the user experience both enjoyable and interactive.
+- **API Integration:** Seamlessly connect with Google's Generative AI using your API key, allowing for flexible and powerful character creation.
+- **Performance:** Benefit from fast and responsive AI interactions, ensuring quick and efficient results.
+- **Fast and Simple:** With an API key, simply paste it and hit "Generate" to quickly create character personas with ease.
+- **FREE:** AVEX offers a completely free experience with a user-friendly interface, allowing unlimited use without any restrictions.
+- **Open Source:** AVEX is open source, ensuring transparency with no hidden issues or malicious code.
+- **Customization Options:** Tailor the character generation process with various customization options. Adjust settings to fine-tune character attributes and enhance the precision of the generated personas.
