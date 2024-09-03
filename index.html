@@ -11,12 +11,16 @@
         async function generateCharacter() {
             const apiKey = document.getElementById('apiKey').value;
             const personaData = document.getElementById('personaData').value;
+            const systemInstruction = document.getElementById('systemInstruction').value;
+            const topK = parseInt(document.getElementById('topK').value, 10);
+            const minP = parseFloat(document.getElementById('minP').value);
+            const randomness = parseFloat(document.getElementById('randomness').value);
 
             if (!apiKey) {
                 alert('Please enter your API key at https://aistudio.google.com/app/apikey, and make sure you have text inside persona data');
                 return;
             }
-          
+
             const prompt = personaData 
                 ? `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}. Generated responses must be in JSON format or W++ format. The generated result must have a persona containing appearance, background story, scenario, first message, and example conversation (e.g., {{char1}: here, {{user}}: here}).`
                 : 'Generate a random character if there is no given text. The character must have a unique persona and background.';
@@ -45,8 +49,12 @@
 
                 const model = genAI.getGenerativeModel({
                     model: "gemini-1.5-flash",
-                    systemInstruction: `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}. Generated responses must be in JSON format or W++ format. The generated result must have a persona containing appearance, background story, scenario, first message, and example conversation (e.g., {{char1}: here, {{user}}: here}).`,
-                    safetySettings
+                    systemInstruction: systemInstruction || `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}. Generated responses must be in JSON format or W++ format. The generated result must have a persona containing appearance, background story, scenario, first message, and example conversation (e.g., {{char1}: here, {{user}}: here}). you will ALWAYS generate a model instruction in the end of every generated responses, the model instruction is the guideline for the character, for example: "{{char}} will not narrate for {{user}", the generated model instruction must be within 200 or 300 words, NEVER add "{{char1}}" only "{{char}}", do not generate user without "{{}}" always "{{user}}" do not always write "the characters" only "{{char}}"`,
+                    safetySettings,
+                    top_k: topK || 40,
+                    min_p: minP || 0.9,
+                    randomness: randomness || 0.7,
+                    modelinstruction: systemInstruction || 'you will ALWAYS generate a model instruction in the end of every generated responses, the model instruction is the guideline for the character, for example: "{{char}} will not narrate for {{user}}"'
                 });
 
                 const result = await model.generateContent(prompt);
@@ -61,12 +69,13 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('generateBtn').addEventListener('click', generateCharacter);
+            document.getElementById('toggleDangerZone').addEventListener('click', () => {
+                const dangerZone = document.getElementById('dangerZone');
+                dangerZone.classList.toggle('hidden');
+            });
         });
     </script>
-    <link
-        rel="icon"
-        href="https://cdn.glitch.global/09e7d406-caae-4b1a-a38a-e9d7ed27db3d/4006f745-0f1a-4c7c-92f3-66bdb50df208-cover.png?v=1725294838912"
-        type="image/x-icon"/>
+    <link rel="icon" href="https://cdn.glitch.global/09e7d406-caae-4b1a-a38a-e9d7ed27db3d/4006f745-0f1a-4c7c-92f3-66bdb50df208-cover.png?v=1725294838912" type="image/x-icon"/>
 </head>
 <body>
     <h1>Whitz Character Gen</h1>
@@ -79,10 +88,34 @@
     <button id="generateBtn">Generate Character</button>
     <h2>Result:</h2>
     <pre id="result"></pre>
+
+    <button id="toggleDangerZone" class="toggle-button">Toggle Danger Zone</button>
+    <div id="dangerZone" class="danger-zone hidden">
+        <h2>Danger Zone</h2>
+        <label for="systemInstruction">System Instruction:</label>
+        <textarea id="systemInstruction" rows="4" placeholder="Modify system instruction"></textarea>
+        <br>
+        <label for="topK">Top K:</label>
+        <input type="number" id="topK" min="0" placeholder="Default: 40">
+        <br>
+        <label for="minP">Min P:</label>
+        <input type="number" id="minP" min="0" max="1" step="0.01" placeholder="Default: 0.9">
+        <br>
+        <label for="randomness">Randomness:</label>
+        <input type="range" id="randomness" min="0" max="1" step="0.01" value="0.7">
+        <span id="randomnessValue">0.7</span>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const resultBox = document.getElementById('result');
+            const randomnessSlider = document.getElementById('randomness');
+            const randomnessValue = document.getElementById('randomnessValue');
 
+            randomnessSlider.addEventListener('input', () => {
+                randomnessValue.textContent = randomnessSlider.value;
+            });
+
+            const resultBox = document.getElementById('result');
             resultBox.addEventListener('dblclick', () => {
                 const selection = window.getSelection();
                 const range = document.createRange();
