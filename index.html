@@ -105,27 +105,41 @@
         <input type="range" id="randomness" min="0" max="1" step="0.01" value="0.7">
         <span id="randomnessValue">0.7</span>
     </div>
-
+    <div id="popup" class="popup hidden">
+    <div class="popup-content">
+        <span class="close-button" id="closePopup">&times;</span>
+        <h2>Suggestion Accepted!</h2>
+        <p>Here is the suggestion post: <a href="https://discord.com/channels/1148016158923030558/1280225272930766928" target="_blank">Discord Link</a></p>
+    </div>
+</div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const randomnessSlider = document.getElementById('randomness');
-            const randomnessValue = document.getElementById('randomnessValue');
+       window.onload = () => {
+    document.getElementById('popup').classList.remove('hidden');
 
-            randomnessSlider.addEventListener('input', () => {
-                randomnessValue.textContent = randomnessSlider.value;
-            });
+    const randomnessSlider = document.getElementById('randomness');
+    const randomnessValue = document.getElementById('randomnessValue');
 
-            const resultBox = document.getElementById('result');
-            resultBox.addEventListener('dblclick', () => {
-                const selection = window.getSelection();
-                const range = document.createRange();
-                range.selectNode(resultBox);
-                selection.removeAllRanges();
-                selection.addRange(range);
-                document.execCommand('copy');
-                alert('Text copied to clipboard!');
-            });
-        });
+    randomnessSlider.addEventListener('input', () => {
+        randomnessValue.textContent = randomnessSlider.value;
+    });
+
+    const resultBox = document.getElementById('result');
+    resultBox.addEventListener('dblclick', () => {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNode(resultBox);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.execCommand('copy');
+        alert('Text copied to clipboard!');
+    });
+
+    document.getElementById('generateBtn').addEventListener('click', () => {});
+
+    document.getElementById('closePopup').addEventListener('click', () => {
+        document.getElementById('popup').classList.add('hidden');
+    });
+};
     </script>
     <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
