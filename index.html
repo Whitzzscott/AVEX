@@ -43,7 +43,7 @@
         const frequencyPenalty = parseFloat(document.getElementById('frequencyPenalty').value) || 0;
         const blockedWords = document.getElementById('blockedWords').value.split(',').map(word => word.trim()).filter(word => word);
 
-        // Detailed console logging with styles
+        // for debugging
         console.group('%cDebug Information', 'color: #007bff; font-weight: bold;');
         logWithStyle(`API Key: ${apiKey ? 'Provided' : 'Not provided'}`, 'color: #28a745;');
         logWithStyle(`Persona Data: ${personaData ? personaData : 'No persona data provided'}`, 'color: #17a2b8;');
@@ -118,7 +118,7 @@
             const cleanedOutput = removeMarkdown(output);
             document.getElementById('result').textContent = cleanedOutput;
 
-            // Logging successful response
+            // debugging only
             logWithStyle('Response received and processed successfully.', 'color: #28a745; font-weight: bold;');
         } catch (error) {
             console.error('%cError occurred:', 'color: #dc3545; font-weight: bold;');
