@@ -16,3 +16,5 @@ AVEX is a sophisticated web application designed to generate diverse and dynamic
 - **Open Source:** AVEX is open source, ensuring transparency with no hidden issues or malicious code.
 - **Customization Options:** Tailor the character generation process with various customization options. Adjust settings to fine-tune character attributes and enhance the precision of the generated personas.
 - **Mobile Friendly:** The design is optimized for mobile devices, ensuring a smooth and enjoyable experience whether you're using a smartphone or tablet. The responsive layout adapts seamlessly to different screen sizes, maintaining functionality and aesthetic appeal across all devices.
+
+LIVE PAGE: https://avex-two.vercel.app/
