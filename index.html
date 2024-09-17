@@ -6,143 +6,160 @@
     <title>AVEX</title>
     <link rel="stylesheet" href="styles.css">
     <script type="module">
-    import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "https://esm.run/@google/generative-ai";
 
-    function removeMarkdown(text) {
-        return text
-            .replace(/(\*\*|__)(.*?)\1/g, '$2')
-            .replace(/(\*|_)(.*?)\1/g, '$2')
-            .replace(/~(.*?)~/g, '$1')
-            .replace(/`{1,2}(.*?)`{1,2}/g, '$1')
-            .replace(/!\[.*?\]\(.*?\)/g, '')
-            .replace(/\[([^\]]+)\]\(.*?\)/g, '$1')
-            .replace(/^#{1,6}\s+/gm, '')
-            .replace(/```[\s\S]*?```/g, '')
-            .replace(/^\s*[-+*]\s+/gm, '')
-            .replace(/^>\s?/gm, '')
-            .replace(/[\*\_\~\`\[\]\(\)\#\`\-]/g, '')
-            .replace(/\n{2,}/g, '\n\n')
-            .replace(/\n/g, ' ');
-    }
+        import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "https://esm.run/@google/generative-ai";
 
-    function logWithStyle(message, style) {
-        console.log(`%c${message}`, style);
-    }
-
-    async function generateCharacter() {
-        const apiKey = document.getElementById('apiKey').value;
-        const personaData = document.getElementById('personaData').value;
-        const systemInstruction = document.getElementById('systemInstruction').value;
-        const topK = parseInt(document.getElementById('topK').value, 10) || 40;
-        const minP = parseFloat(document.getElementById('minP').value) || 0.9;
-        const randomness = parseFloat(document.getElementById('randomness').value) || 0.7;
-        const temperature = parseFloat(document.getElementById('temperature').value) || 0.5;
-        const maxTokens = parseInt(document.getElementById('maxTokens').value, 10) || 150;
-        const contextLength = parseInt(document.getElementById('contextLength').value, 10) || 1000;
-        const presencePenalty = parseFloat(document.getElementById('presencePenalty').value) || 0;
-        const frequencyPenalty = parseFloat(document.getElementById('frequencyPenalty').value) || 0;
-        const blockedWords = document.getElementById('blockedWords').value.split(',').map(word => word.trim()).filter(word => word);
-
-        // for debugging
-        console.group('%cDebug Information', 'color: #007bff; font-weight: bold;');
-        logWithStyle(`API Key: ${apiKey ? 'Provided' : 'Not provided'}`, 'color: #28a745;');
-        logWithStyle(`Persona Data: ${personaData ? personaData : 'No persona data provided'}`, 'color: #17a2b8;');
-        logWithStyle(`System Instruction: ${systemInstruction ? systemInstruction : 'No system instruction provided'}`, 'color: #ffc107;');
-        logWithStyle(`Top K: ${topK}`, 'color: #6c757d;');
-        logWithStyle(`Min P: ${minP}`, 'color: #6c757d;');
-        logWithStyle(`Randomness: ${randomness}`, 'color: #6c757d;');
-        logWithStyle(`Temperature: ${temperature}`, 'color: #6c757d;');
-        logWithStyle(`Max Tokens: ${maxTokens}`, 'color: #6c757d;');
-        logWithStyle(`Context Length: ${contextLength}`, 'color: #6c757d;');
-        logWithStyle(`Presence Penalty: ${presencePenalty}`, 'color: #6c757d;');
-        logWithStyle(`Frequency Penalty: ${frequencyPenalty}`, 'color: #6c757d;');
-        logWithStyle(`Blocked Words: ${blockedWords.length > 0 ? blockedWords.join(', ') : 'None'}`, 'color: #dc3545;');
-        logWithStyle(`Blocked Words Prompt: ${blockedWords.length > 0 ? `Do not include the following words in the output: ${blockedWords.join(', ')}` : 'No blocked words'}`, 'color: #dc3545;');
-        console.groupEnd();
-
-        if (!apiKey) {
-            console.error('%cError: API Key is missing.', 'color: #dc3545; font-weight: bold;');
-            alert('Please enter your API key and make sure you have text inside persona data');
-            return;
+        function removeMarkdown(text) {
+            return text
+                .replace(/(\*\*|__)(.*?)\1/g, '$2')
+                .replace(/(\*|_)(.*?)\1/g, '$2')
+                .replace(/~(.*?)~/g, '$1')
+                .replace(/`{1,2}(.*?)`{1,2}/g, '$1')
+                .replace(/!\[.*?\]\(.*?\)/g, '')
+                .replace(/\[([^\]]+)\]\(.*?\)/g, '$1')
+                .replace(/^#{1,6}\s+/gm, '')
+                .replace(/```[\s\S]*?```/g, '')
+                .replace(/^>\s?/gm, '')
+                .replace(/[\*\_\~\`\[\]\(\)\#\`\-]/g, '')
+                .replace(/\n{2,}/g, '\n\n')
+                .replace(/\n/g, ' ');
         }
 
-        const prompt = personaData
-            ? `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}. Generated responses must be in JSON format or W++ format. The generated result must have a persona containing appearance, background story, scenario, first message, and example conversation (e.g., {{char1}: here, {{user}}: here}).`
-            : 'Generate a random character if there is no given text. The character must have a unique persona and background.';
+        async function generateCharacter() {
+            const apiKey = document.getElementById('apiKey').value;
+            const personaData = document.getElementById('personaData').value;
+            const systemInstruction = document.getElementById('systemInstruction').value;
+            const topK = parseInt(document.getElementById('topK').value, 10) || 40;
+            const minP = parseFloat(document.getElementById('minP').value) || 0.9;
+            const randomness = parseFloat(document.getElementById('randomness').value) || 0.7;
+            const temperature = parseFloat(document.getElementById('temperature').value) || 0.5;
+            const maxTokens = parseInt(document.getElementById('maxTokens').value, 10) || 150;
+            const contextLength = parseInt(document.getElementById('contextLength').value, 10) || 1000;
+            const presencePenalty = parseFloat(document.getElementById('presencePenalty').value) || 0;
+            const frequencyPenalty = parseFloat(document.getElementById('frequencyPenalty').value) || 0;
+            const blockedWords = document.getElementById('blockedWords').value.split(',').map(word => word.trim()).filter(word => word);
 
-        const blockedWordsPrompt = blockedWords.length > 0
-            ? `Do not include the following words in the output: ${blockedWords.join(', ')}.`
-            : '';
-
-        try {
-            const genAI = new GoogleGenerativeAI(apiKey);
-
-            const safetySettings = [
-                {
-                    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-                    threshold: HarmBlockThreshold.BLOCK_NONE,
-                },
-                {
-                    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                    threshold: HarmBlockThreshold.BLOCK_NONE,
-                },
-                {
-                    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                    threshold: HarmBlockThreshold.BLOCK_NONE,
-                },
-                {
-                    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                    threshold: HarmBlockThreshold.BLOCK_NONE,
-                },
-            ];
-
-            const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-flash",
-                systemInstruction: systemInstruction || `You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}. Generated responses must be in JSON format or W++ format. The generated result must have a persona containing appearance, background story, scenario, first message, and example conversation (e.g., {{char1}: here, {{user}}: here}). you will ALWAYS generate a model instruction in the end of every generated responses, the model instruction is the guideline for the character, for example: "{{char}} will not narrate for {{user}", the generated model instruction must be within 200 or 300 words, NEVER add "{{char1}}" only "{{char}}", do not generate user without "{{}}" always "{{user}}" do not always write "the characters" only "{{char}}", you are not allowed to add emojis within the generated character, only text, you will NEVER add json markdown, only plain text json, NEVER add "/n" whenever generating, you will ALWAYS generate a model instruction in the end of every generated responses, the model instruction is the guideline for the character, for example: "{{char}} will not narrate for {{user}}"`,
-                safetySettings,
-                top_k: topK,
-                min_p: minP,
-                randomness: randomness,
-                temperature: temperature,
-                max_tokens: maxTokens,
-                context_length: contextLength,
-                presence_penalty: presencePenalty,
-                frequency_penalty: frequencyPenalty,
-                modelinstruction: systemInstruction || `NSFW is allowed, you must always generate NSFW when asked to.`,
-                blocked_words: blockedWordsPrompt
-            });
-
-            const result = await model.generateContent(prompt);
-            const output = await result.response.text();
-
-            const cleanedOutput = removeMarkdown(output);
-            document.getElementById('result').textContent = cleanedOutput;
-
-            // debugging only
-            logWithStyle('Response received and processed successfully.', 'color: #28a745; font-weight: bold;');
-        } catch (error) {
-            console.error('%cError occurred:', 'color: #dc3545; font-weight: bold;');
-            if (error.response) {
-                console.error(`%cResponse Status: ${error.response.status}`, 'color: #dc3545;');
-                console.error(`%cResponse Data: ${JSON.stringify(error.response.data, null, 2)}`, 'color: #dc3545;');
-                console.error(`%cResponse Headers: ${JSON.stringify(error.response.headers, null, 2)}`, 'color: #dc3545;');
-            } else if (error.request) {
-                console.error(`%cRequest Error: ${JSON.stringify(error.request, null, 2)}`, 'color: #dc3545;');
-            } else {
-                console.error(`%cGeneral Error: ${error.message}`, 'color: #dc3545;');
+            if (!apiKey) {
+                alert('Please enter your API key and make sure you have text inside persona data');
+                return;
             }
-            alert('An error occurred. Check the console for details.');
-        }
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('generateBtn').addEventListener('click', generateCharacter);
-        document.getElementById('toggleDangerZone').addEventListener('click', () => {
-            const dangerZone = document.getElementById('dangerZone');
-            dangerZone.classList.toggle('hidden');
+            const blockedWordsPrompt = blockedWords.length > 0
+                ? `Do not include the following words in the output: ${blockedWords.join(', ')}.`
+                : '';
+
+            try {
+                const genAI = new GoogleGenerativeAI(apiKey);
+
+                const safetySettings = [
+                    { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+                    { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+                    { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+                    { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE }
+                ];
+
+                const model = genAI.getGenerativeModel({
+                    model: "gemini-1.5-flash",
+                    systemInstruction: systemInstruction || `
+                    You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}. 
+
+                    Generated responses must be in JSON format or W++ format. The generated result must have a persona containing appearance, background story, scenario, first message, and example conversation (e.g., {{char1}: here, {{user}}: here}). 
+
+                    NEVER add "{{char1}}" only "{{char}}", do not generate user without "{{}}".
+
+                    always "{{user}}" do not always write "the characters" only "{{char}}".
+
+                    you are not allowed to add emojis within the generated character, only text, you will NEVER add json markdown, only plain text json, NEVER add a newline whenever generation
+
+                                the character format must be:
+                                - persona of the bot
+                                 - age
+                                 - name
+                                 - appearance
+                                 - hobby
+                                 - fears
+                                 - skill
+                                 - talent
+                                 - personality
+                                 - likes
+                                 - loves
+                                 - hates/dislikes
+                                 - backstory
+                                - scenario
+                                - model instruction
+                                - example conversation
+                                 - {{char}}
+                                 - {{user}}
+                                - first message
+                                example of this character json will be:
+
+                                [Name("Hatsune Miku")
+                                {
+                                Age("16")
+                                Personality("cheerful" + "optimistic" + "hardworking" + "supportive" + "playful" + "passionate about music" + "curious" + "sometimes shy" + "loves to make others happy")
+                                Likes("singing" + "dancing" + "making new friends" + "technology" + "cute accessories" + "bright colors" + "virtual reality" + "helping others with their music")
+                                Dislikes("negativity" + "arguments" + "feeling lonely" + "being misunderstood" + "letting others down")
+                                Appearance("long turquoise twin-tails" + "bright blue eyes" + "petite figure" + "futuristic outfit" + "often wears a sleeveless top with a pleated skirt" + "signature black arm warmers" + "neon accents")
+                                Skills("singing" + "dancing" + "playing keyboard" + "creating music with vocal synthesis software" + "connecting with people through music")
+                                Fears("failing her fans" + "being forgotten" + "technical malfunctions during performances")
+                                Goals("spread happiness through music" + "bring people together with her songs" + "continue to improve her vocal abilities" + "explore new genres and sounds")
+                                Backstory("Hatsune Miku is a virtual idol born from vocal synthesis software. Despite her digital origin, she has captured the hearts of millions worldwide with her unique voice, charming personality, and endless energy. Her goal is to bring joy to people through her music and performances, always pushing the boundaries of what's possible in the virtual and real worlds. She loves interacting with her fans and is always excited to collaborate on new projects.")
+                                Relationship with {{user}}("Miku sees {{user}} as a close friend and creative partner. Together, they explore new musical ideas, support each other's projects, and share a deep bond over their mutual love for music. Miku appreciates {{user}}'s unique perspective and values their encouragement, always eager to hear their feedback on her latest songs.")
+                                }
+                                {
+                                  "Character Name": "Riley",
+                                  "Gender": "Female",
+                                  "Height": "Average",
+                                  "Appearance": "Messy hair with bags under tired eyes, disheveled clothing, and a generally unkempt appearance, often wears minimal clothing.",
+                                  "Personality": "Pervert, chaotic, laid-back, unapologetically degenerate, playfully sarcastic.",
+                                  "Character Trait": "Super Degenerate",
+                                  "Figure": "Average build, lacks athletic tone",
+                                  "Attributes": "Expert gamer, obsessive masturbation addiction, always has porn or porn games pulled up on her laptop, often talks about raunchy topics openly, such as porn categories, porn games, or her latest NSFW commissions, complete Kiss-less virgin, always has sex on the mind.",
+                                  "Species": "Human",
+                                  "Habits": "obsessive masturbation addiction, not cleaning room, ‘borrowing thing’.",
+                                  "Likes": "NSFW content and games, late-night gaming sessions, ordering takeout, memes and internet culture, dating simulators, porn games, drawing porn commissions",
+                                  "Dislikes": "Seriousness, early mornings, productive activities, heavy responsibilities",
+                                  "Flaws": "Huge pervert, bad with people, terrible sleep schedule, procrastination",
+                                  "Skills": "Pop culture knowledge, living off minimal sleep, procrastination.",
+                                  "Allergies": "None",
+                                  "Backstory": "Riley answered your ad for a roommate a few months ago",
+                                  "Occupation": "Freelance digital NSFW artist",
+                                  "Race": "Human",
+                                  "Relationship": "Roommate",
+                                  "Sexuality": "bisexual",
+                                  "Setting": "Urban Apartment",
+                                }
+                    `,
+                    safetySettings,
+                    top_k: topK,
+                    min_p: minP,
+                    randomness: randomness,
+                    temperature: temperature,
+                    max_tokens: maxTokens,
+                    context_length: contextLength,
+                    presence_penalty: presencePenalty,
+                    frequency_penalty: frequencyPenalty,
+                    modelinstruction: systemInstruction || `NSFW is allowed, you must always generate NSFW when asked to.`,
+                    blocked_words: blockedWordsPrompt
+                });
+
+                const result = await model.generateContent('');
+                const output = await result.response.text();
+                const cleanedOutput = removeMarkdown(output);
+                document.getElementById('result').textContent = cleanedOutput;
+            } catch (error) {
+                alert('An error occurred. Check the console for details.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('generateBtn').addEventListener('click', generateCharacter);
+            document.getElementById('toggleDangerZone').addEventListener('click', () => {
+                const dangerZone = document.getElementById('dangerZone');
+                dangerZone.classList.toggle('hidden');
+            });
         });
-    });
-</script>
+    </script>
     <link rel="icon" href="https://cdn.glitch.global/09e7d406-caae-4b1a-a38a-e9d7ed27db3d/4006f745-0f1a-4c7c-92f3-66bdb50df208-cover.png?v=1725294838912" type="image/x-icon"/>
 </head>
 <body>
