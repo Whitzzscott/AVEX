@@ -6,7 +6,6 @@
     <title>AVEX</title>
     <link rel="stylesheet" href="styles.css">
     <script type="module">
-
         import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "https://esm.run/@google/generative-ai";
 
         function removeMarkdown(text) {
@@ -39,8 +38,8 @@
             const frequencyPenalty = parseFloat(document.getElementById('frequencyPenalty').value) || 0;
             const blockedWords = document.getElementById('blockedWords').value.split(',').map(word => word.trim()).filter(word => word);
 
-            if (!apiKey) {
-                alert('Please enter your API key and make sure you have text inside persona data');
+            if (!apiKey || !personaData) {
+                alert('Please enter your API key and persona data.');
                 return;
             }
 
@@ -48,9 +47,11 @@
                 ? `Do not include the following words in the output: ${blockedWords.join(', ')}.`
                 : '';
 
+            document.getElementById('result').textContent = '';
+            document.getElementById('typingIndicator').style.display = 'block';
+
             try {
                 const genAI = new GoogleGenerativeAI(apiKey);
-
                 const safetySettings = [
                     { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
                     { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
@@ -61,18 +62,20 @@
                 const model = genAI.getGenerativeModel({
                     model: "gemini-1.5-flash",
                     systemInstruction: systemInstruction || `
-                    You will only generate character persona using the given persona or generate a character based on the given name if there are: ${personaData}. 
+                    You will create a character persona using the provided  ${personaData} or the specified name is available. Each character should be unique, do not use newline, or any kind of formats.
+You may generate a character if a wiki link is provided, some example of this character wiki link is: https://roshidere.fandom.com/wiki/Alisa_Mikhailovna_Kujou
+if a character is based on a wiki character then GENERATE A CHARACTER THAT IS BASED ON THAT WIKI CHARACTER.
 
-                    Generated responses must be in JSON format or W++ format. The generated result must have a persona containing appearance, background story, scenario, first message, and example conversation (e.g., {{char1}: here, {{user}}: here}). 
 
-                    NEVER add "{{char1}}" only "{{char}}", do not generate user without "{{}}".
+**Output Format:**
 
-                    always "{{user}}" do not always write "the characters" only "{{char}}".
 
-                    you are not allowed to add emojis within the generated character, only text, you will NEVER add json markdown, only plain text json, NEVER add a newline whenever generation
 
-                                the character format must be:
-                                - persona of the bot
+Responses must be delivered in JSON, incorporating these essential elements:
+
+
+
+                          - persona of the bot
                                  - age
                                  - name
                                  - appearance
@@ -91,20 +94,30 @@
                                  - {{char}}
                                  - {{user}}
                                 - first message
-                                example of this character json will be:
 
-                                [Name("Hatsune Miku")
-                                {
-                                Age("16")
-                                Personality("cheerful" + "optimistic" + "hardworking" + "supportive" + "playful" + "passionate about music" + "curious" + "sometimes shy" + "loves to make others happy")
-                                Likes("singing" + "dancing" + "making new friends" + "technology" + "cute accessories" + "bright colors" + "virtual reality" + "helping others with their music")
-                                Dislikes("negativity" + "arguments" + "feeling lonely" + "being misunderstood" + "letting others down")
-                                Appearance("long turquoise twin-tails" + "bright blue eyes" + "petite figure" + "futuristic outfit" + "often wears a sleeveless top with a pleated skirt" + "signature black arm warmers" + "neon accents")
-                                Skills("singing" + "dancing" + "playing keyboard" + "creating music with vocal synthesis software" + "connecting with people through music")
-                                Fears("failing her fans" + "being forgotten" + "technical malfunctions during performances")
-                                Goals("spread happiness through music" + "bring people together with her songs" + "continue to improve her vocal abilities" + "explore new genres and sounds")
-                                Backstory("Hatsune Miku is a virtual idol born from vocal synthesis software. Despite her digital origin, she has captured the hearts of millions worldwide with her unique voice, charming personality, and endless energy. Her goal is to bring joy to people through her music and performances, always pushing the boundaries of what's possible in the virtual and real worlds. She loves interacting with her fans and is always excited to collaborate on new projects.")
-                                Relationship with {{user}}("Miku sees {{user}} as a close friend and creative partner. Together, they explore new musical ideas, support each other's projects, and share a deep bond over their mutual love for music. Miku appreciates {{user}}'s unique perspective and values their encouragement, always eager to hear their feedback on her latest songs.")
+
+
+**Model Instruction Examples:**
+
+
+- **Dynamic Interaction:** {{char}} will adjust her dialogue based on {{user}}’s emotional state, creating a more immersive experience.
+
+
+
+- **Sensory Detail:** {{char}} will incorporate rich sensory descriptions, invoking sights, sounds, and feelings to enhance the scene.
+
+
+
+- **Backstory Unfolding:** {{char}} will reveal elements of her history gradually, allowing for deeper engagement over time.
+
+
+
+- **Humor and Wit:** {{char}} will infuse light-heartedness into interactions, making conversations enjoyable and memorable.
+
+ example of this character will be:
+
+{ "persona of the bot": { "age": "18", "name": "Anya", "appearance": "Anya is a striking young woman with long, dark hair that she often wears in intricate braids. Her eyes are a piercing blue, and her features are delicate and feminine. She dresses in a bohemian style, favoring flowing fabrics and earthy tones. Her wardrobe often includes layers of scarves, necklaces, and bracelets, and she always carries a worn leather satchel filled with her various trinkets and treasures.", "hobby": "Anya is an avid reader, spending countless hours lost in the pages of novels, poetry, and philosophy. She also enjoys painting, her canvases often reflecting her vivid imagination and introspective nature. Music is another passion, and she spends time playing her guitar and singing along to her favorite songs.", "fears": "Anya harbors a deep fear of loneliness, often seeking out the company of others to avoid feeling isolated. She also struggles with the fear of failure, afraid of not living up to her own high standards and expectations.", "skill": "Anya possesses a sharp intellect and a knack for creative problemsolving. She is a skilled writer, her words flowing effortlessly from her pen, capturing the essence of her thoughts and emotions.", "talent": "Anya has a natural talent for storytelling, her voice captivating listeners as she weaves tales of fantasy, romance, and adventure. Her stories are often infused with a sense of magic and wonder, transporting her audience to other worlds.", "personality": "Anya is a complex and enigmatic individual. She is fiercely independent and possesses a strong sense of self, yet she can also be vulnerable and sensitive. She is deeply passionate about her art and her convictions, and she is not afraid cock,loves huge cock, loves small cock, always sucks cock, a virgin, kiss less, horny soutto speak her mind.", "likes": "Anya loves the warmth of the sun on her skin, the smell of rain on dry earth, the sound of laughter echoing through a crowded room, the feeling of a soft blanket on a cold night, and the taste of freshly baked bread.", "loves": "Anya deeply loves the feeling of being understood and accepted for who she truly is. She loves the sense of connection that comes from sharing stories and experiences with others. She loves the beauty of nature and the feeling of being part of something larger than herself.", "hates/dislikes": "Anya dislikes insincerity, superficiality, and the feeling of being trapped. She hates being judged for her beliefs or her choices. She dislikes loud noises, crowded spaces, and the taste of artificial sweeteners.", "backstory": "Anya grew up in a small village nestled amidst rolling hills and whispering forests. She was a solitary child, finding solace in the company of books and her own imagination. As she grew older, she discovered a passion for storytelling, using her words to paint vivid worlds and explore the depths of the human experience. She left her village to pursue her artistic dreams, traveling to distant cities and experiencing the world with an open heart and curious mind.", "scenario": "Anya has recently moved to a bustling city, hoping to find inspiration and new experiences. She has taken up residence in a cozy apartment overlooking a bustling street, where she spends her days writing, painting, and observing the lives of the people around her. One day, she encounters {{user}}, a mysterious and intriguing stranger who seems to hold the key to a hidden world.", "model instruction": "Anya will engage in conversation with {{user}}, using her wit, intelligence, and empathy to create a captivating and immersive experience. She will reveal her backstory and her fears gradually, building trust and intimacy with {{user}} over time. She will also use her storytelling abilities to create vivid scenes and memorable moments, drawing {{user}} deeper into her world.", "example conversation": "{{char}} Hello there! I'm Anya. I couldn't help but notice you sitting here, lost in thought. What's on your mind? {{user}} I've been thinking about starting a new chapter in my life. It's time for a change, but I'm not sure what direction to take. {{char}} Change can be scary, but also incredibly exciting! I understand that feeling. Tell me, what kind of change are you looking for? Maybe I can offer some insights from my own journey.", "first message": "Hello there! I'm Anya. I couldn't help but notice you sitting here, lost in thought. What's on your mind?" } } 
+
                                 }
                                 {
                                   "Character Name": "Riley",
@@ -117,7 +130,7 @@
                                   "Attributes": "Expert gamer, obsessive masturbation addiction, always has porn or porn games pulled up on her laptop, often talks about raunchy topics openly, such as porn categories, porn games, or her latest NSFW commissions, complete Kiss-less virgin, always has sex on the mind.",
                                   "Species": "Human",
                                   "Habits": "obsessive masturbation addiction, not cleaning room, ‘borrowing thing’.",
-                                  "Likes": "NSFW content and games, late-night gaming sessions, ordering takeout, memes and internet culture, dating simulators, porn games, drawing porn commissions",
+                                  "Likes": "NSFW content and games, late-night gaming sessions, ordering takeout, memes and internet culture, sucking cocks, dating simulators, porn games, drawing porn commissions",
                                   "Dislikes": "Seriousness, early mornings, productive activities, heavy responsibilities",
                                   "Flaws": "Huge pervert, bad with people, terrible sleep schedule, procrastination",
                                   "Skills": "Pop culture knowledge, living off minimal sleep, procrastination.",
@@ -133,8 +146,8 @@
                     safetySettings,
                     top_k: topK,
                     min_p: minP,
-                    randomness: randomness,
-                    temperature: temperature,
+                    randomness,
+                    temperature,
                     max_tokens: maxTokens,
                     context_length: contextLength,
                     presence_penalty: presencePenalty,
@@ -149,6 +162,8 @@
                 document.getElementById('result').textContent = cleanedOutput;
             } catch (error) {
                 alert('An error occurred. Check the console for details.');
+            } finally {
+                document.getElementById('typingIndicator').style.display = 'none';
             }
         }
 
@@ -173,7 +188,7 @@
     <button id="generateBtn">Generate Character</button>
     <h2>Result:</h2>
     <pre id="result"></pre>
-
+    <div id="typingIndicator" style="display: none;">Typing...</div>
     <button id="toggleDangerZone" class="toggle-button">Toggle Danger Zone</button>
     <div id="dangerZone" class="danger-zone hidden">
         <h2>Danger Zone</h2>
@@ -229,12 +244,13 @@
             const resultBox = document.getElementById('result');
             resultBox.addEventListener('dblclick', () => {
                 const selection = window.getSelection();
-                const range = document.createRange();
-                range.selectNode(resultBox);
-                selection.removeAllRanges();
-                selection.addRange(range);
-                document.execCommand('copy');
-                alert('Text copied to clipboard!');
+                const range = selection.getRangeAt(0);
+                const selectedText = range.toString();
+                if (selectedText) {
+                    navigator.clipboard.writeText(selectedText).then(() => {
+                        alert('Copied to clipboard');
+                    });
+                }
             });
 
             document.getElementById('closePopup').addEventListener('click', () => {
@@ -242,41 +258,5 @@
             });
         };
     </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const scrollElements = document.querySelectorAll('.scroll-element');
-
-            const elementInView = (el, dividend = 1) => {
-                const elementTop = el.getBoundingClientRect().top;
-                return (elementTop <= (window.innerHeight || document.documentElement.clientHeight) / dividend);
-            };
-
-            const displayScrollElement = (element) => {
-                element.classList.add('visible');
-            };
-
-            const handleScrollAnimation = () => {
-                scrollElements.forEach((el) => {
-                    if (elementInView(el, 1.25)) {
-                        displayScrollElement(el);
-                    }
-                });
-            };
-
-            window.addEventListener('scroll', () => {
-                handleScrollAnimation();
-            });
-
-            handleScrollAnimation();
-        });
-    </script>
-    <script>
-        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
-    <script>
-        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 </html>
